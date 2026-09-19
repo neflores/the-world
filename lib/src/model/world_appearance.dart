@@ -12,6 +12,16 @@ class WorldAppearance {
   final WorldBuilding building;
   final bool banner, plants, festival;
 
+  @override
+  bool operator ==(Object other) =>
+      other is WorldAppearance &&
+      building == other.building &&
+      banner == other.banner &&
+      plants == other.plants &&
+      festival == other.festival;
+  @override
+  int get hashCode => Object.hash(building, banner, plants, festival);
+
   WorldAppearance copyWith({
     WorldBuilding? building,
     bool? banner,

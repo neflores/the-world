@@ -11,6 +11,7 @@ import '../renderer/city_scene.dart';
 import '../renderer/region_scene.dart';
 import '../renderer/scene_pin.dart';
 import '../runtime/world_controller.dart';
+import '../runtime/scene_signature.dart';
 import '../module/world_diagnostic.dart';
 import '../module/world_host_capabilities.dart';
 import 'atlas_canvas.dart';
@@ -50,7 +51,7 @@ class _WorldViewState extends State<WorldView> {
   late final Future<AtlasAssets> _loading;
   AtlasAssets? _assets;
   AtlasScene? _scene;
-  WorldSnapshot? _renderedSnapshot;
+  SceneSignature? _renderedStructure;
   final _mapKey = GlobalKey<AtlasCanvasState>();
   String? _cityId, _selected;
   String _search = '';
@@ -259,13 +260,13 @@ class _WorldViewState extends State<WorldView> {
     WorldSnapshot snapshot,
     WorldCity? city,
   ) {
-    final key = city == null ? 'israel' : '${city.id}/$_neighborhood';
-    if (_scene?.key != key || _renderedSnapshot != snapshot) {
+    final structure = SceneSignature(snapshot, city?.id, _neighborhood);
+    if (_renderedStructure != structure) {
       final old = _scene;
       _scene = city == null
           ? buildRegionScene(assets, snapshot)
           : buildCityScene(assets, snapshot, city, _neighborhood);
-      _renderedSnapshot = snapshot;
+      _renderedStructure = structure;
       if (old != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
       }
