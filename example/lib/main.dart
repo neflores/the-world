@@ -60,21 +60,28 @@ class _MainAppState extends State<MainApp> {
     ),
     home: Builder(
       builder: (context) => Scaffold(
-        body: WorldView(
+        body: WorldModule(
           source: widget.source,
-          canCreateClub: true,
-          canEditAppearance: (_) => true,
-          onIntent: (intent) async {
-            if (intent is OpenWorldDestination) {
-              await showPlaygroundDestination(
-                context,
-                widget.source.snapshot,
-                intent,
-              );
-            } else {
-              await widget.source.handle(intent);
-            }
-          },
+          host: const WorldHostContext(
+            surface: WorldHostSurface.playground,
+            viewerId: 'local-player',
+            environment: 'local',
+          ),
+          capabilities: const WorldHostCapabilities.playground(),
+          bridge: CallbackWorldHostBridge(
+            onIntent: (intent) async {
+              if (intent is OpenWorldDestination) {
+                await showPlaygroundDestination(
+                  context,
+                  widget.source.snapshot,
+                  intent,
+                );
+              } else {
+                await widget.source.handle(intent);
+              }
+            },
+            onDiagnostic: (event) => debugPrint('World: ${event.code.name}'),
+          ),
         ),
       ),
     ),

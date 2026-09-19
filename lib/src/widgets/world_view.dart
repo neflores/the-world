@@ -11,6 +11,8 @@ import '../renderer/city_scene.dart';
 import '../renderer/region_scene.dart';
 import '../renderer/scene_pin.dart';
 import '../runtime/world_controller.dart';
+import '../module/world_diagnostic.dart';
+import '../module/world_host_capabilities.dart';
 import 'atlas_canvas.dart';
 import 'club_form.dart';
 import 'location_card.dart';
@@ -28,12 +30,16 @@ class WorldView extends StatefulWidget {
     required this.onIntent,
     this.canCreateClub = false,
     this.canEditAppearance,
+    this.onDiagnostic,
+    this.capabilities = const WorldHostCapabilities.playground(),
     super.key,
   });
   final WorldDataSource source;
   final WorldIntentHandler onIntent;
   final bool canCreateClub;
   final bool Function(WorldLocation location)? canEditAppearance;
+  final void Function(WorldDiagnostic)? onDiagnostic;
+  final WorldHostCapabilities capabilities;
   @override
   State<WorldView> createState() => _WorldViewState();
 }
@@ -52,23 +58,40 @@ class _WorldViewState extends State<WorldView> {
   @override
   void initState() {
     super.initState();
-    _controller = WorldController(widget.source);
+    _controller = _newController();
     _loading = AtlasAssets.load();
-    _loading.then((value) {
-      if (mounted) {
-        _assets = value;
-      } else {
-        value.dispose();
-      }
-    }, onError: (Object _) {});
+    _loading.then(
+      (value) {
+        if (mounted) {
+          _assets = value;
+        } else {
+          value.dispose();
+        }
+      },
+      onError: (Object error) {
+        if (mounted) {
+          widget.onDiagnostic?.call(
+            WorldDiagnostic(WorldDiagnosticCode.assets, cause: error),
+          );
+        }
+      },
+    );
   }
+
+  WorldController _newController() => WorldController(
+    widget.source,
+    onDiagnostic: (event) => widget.onDiagnostic?.call(event),
+  );
+  Future<void> _intent(WorldIntent intent) => widget.onIntent(intent);
 
   @override
   void didUpdateWidget(WorldView old) {
     super.didUpdateWidget(old);
     if (old.source != widget.source) {
       _controller.dispose();
-      _controller = WorldController(widget.source);
+      _controller = _newController();
+      _cityId = null;
+      _selected = null;
     }
   }
 
@@ -108,7 +131,7 @@ class _WorldViewState extends State<WorldView> {
       builder: (_) => ClubForm(
         cities: _controller.snapshot!.cities,
         initialCityId: _cityId,
-        onIntent: widget.onIntent,
+        onIntent: _intent,
       ),
     );
     if (mounted && cityId != null) {
@@ -122,6 +145,7 @@ class _WorldViewState extends State<WorldView> {
     context: context,
     builder: (dialogContext) => PersonCard(
       person: person,
+      capabilities: widget.capabilities,
       onAction: (action) {
         Navigator.pop(dialogContext);
         _dispatch(OpenWorldDestination(action, person.id));
@@ -173,7 +197,7 @@ class _WorldViewState extends State<WorldView> {
                       builder: (_) => WorldAppearanceEditor(
                         locationId: current.id,
                         initialAppearance: current.appearance,
-                        onIntent: widget.onIntent,
+                        onIntent: _intent,
                       ),
                     );
                   }
@@ -303,7 +327,9 @@ class _WorldViewState extends State<WorldView> {
                         WorldToolbar(
                           simulation: snapshot.isSimulation,
                           status: snapshot.status,
-                          onStatus: (s) => _dispatch(SetWorldStatus(s)),
+                          onStatus: widget.capabilities.canUsePresence
+                              ? (s) => _dispatch(SetWorldStatus(s))
+                              : null,
                           quiet: _quiet,
                           onQuiet: () => setState(() => _quiet = !_quiet),
                           listOnly: listOnly,

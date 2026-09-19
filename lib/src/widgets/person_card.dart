@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import '../interaction/world_intent.dart';
 import '../model/world_presence.dart';
+import '../module/world_host_capabilities.dart';
 
 class PersonCard extends StatelessWidget {
-  const PersonCard({required this.person, required this.onAction, super.key});
+  const PersonCard({
+    required this.person,
+    required this.onAction,
+    this.capabilities = const WorldHostCapabilities(),
+    super.key,
+  });
+  final WorldHostCapabilities capabilities;
   final WorldPresence person;
   final ValueChanged<WorldDestination> onAction;
   @override
@@ -31,16 +38,21 @@ class PersonCard extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
         child: const Text('Close'),
       ),
-      TextButton(
-        onPressed: () => onAction(WorldDestination.profile),
-        child: const Text('View profile'),
-      ),
-      if (person.canMessage)
+      if (capabilities.canNavigate && capabilities.canOpenProfiles)
+        TextButton(
+          onPressed: () => onAction(WorldDestination.profile),
+          child: const Text('View profile'),
+        ),
+      if (person.canMessage &&
+          capabilities.canNavigate &&
+          capabilities.canOpenMessages)
         TextButton(
           onPressed: () => onAction(WorldDestination.message),
           child: const Text('Message'),
         ),
-      if (person.canInvite)
+      if (person.canInvite &&
+          capabilities.canNavigate &&
+          capabilities.canInvite)
         TextButton(
           onPressed: () => onAction(WorldDestination.invite),
           child: const Text('Invite'),

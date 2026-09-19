@@ -1,6 +1,13 @@
 /// Shared World Flutter module.
 library;
 
+export 'src/module/world_module.dart';
+export 'src/module/world_host_context.dart';
+export 'src/module/world_host_capabilities.dart';
+export 'src/module/world_host_bridge.dart';
+export 'src/module/world_diagnostic.dart';
+export 'src/module/world_module_state.dart';
+
 export 'src/widgets/world_view.dart';
 export 'src/data/world_data_source.dart';
 export 'src/interaction/world_intent.dart';

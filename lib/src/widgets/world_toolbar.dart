@@ -15,7 +15,7 @@ class WorldToolbar extends StatelessWidget {
   });
   final bool simulation, quiet, listOnly;
   final SocialStatus status;
-  final ValueChanged<SocialStatus> onStatus;
+  final ValueChanged<SocialStatus>? onStatus;
   final VoidCallback onQuiet, onListOnly;
   final VoidCallback? onAdd;
   @override
@@ -38,24 +38,25 @@ class WorldToolbar extends StatelessWidget {
         ),
       ),
       if (simulation) const Chip(label: Text('Playground · local data')),
-      PopupMenuButton<SocialStatus>(
-        tooltip: 'Social status',
-        initialValue: status,
-        onSelected: onStatus,
-        itemBuilder: (_) => [
-          for (final s in SocialStatus.values)
-            PopupMenuItem(value: s, child: Text(s.label)),
-        ],
-        child: Chip(
-          avatar: Icon(
-            status == SocialStatus.hidden
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
-            size: 18,
+      if (onStatus != null)
+        PopupMenuButton<SocialStatus>(
+          tooltip: 'Social status',
+          initialValue: status,
+          onSelected: onStatus,
+          itemBuilder: (_) => [
+            for (final s in SocialStatus.values)
+              PopupMenuItem(value: s, child: Text(s.label)),
+          ],
+          child: Chip(
+            avatar: Icon(
+              status == SocialStatus.hidden
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              size: 18,
+            ),
+            label: Text(status.label),
           ),
-          label: Text(status.label),
         ),
-      ),
       IconButton.filledTonal(
         tooltip: quiet ? 'Enable animation' : 'Quiet mode',
         onPressed: onQuiet,
