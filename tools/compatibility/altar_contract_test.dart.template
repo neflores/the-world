@@ -1,0 +1,33 @@
+import 'package:altar_tabletop_api_transport/altar_tabletop_api_transport.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:world/world.dart';
+import '../lib/organization_world_mapper.dart';
+
+void main() {
+  test('Altar generated DTO maps to World without identity or authority loss', () {
+    final dto = PublicOrganizationProfile((b) => b
+      ..organizationProfileId = '10c87711-cad7-41cb-95c7-761967cedc0c'
+      ..kind = OrganizationKind.physicalClub
+      ..displayName = 'Altar contract test'
+      ..shortDescription = 'Read-only compatibility fixture'
+      ..layout = ProfileLayout.balanced);
+    final location = projectOrganization(dto, cityId: 'haifa',
+      district: CityDistrict.north, plot: 0, address: 'Test address');
+    expect(location.id, dto.organizationProfileId);
+    expect(location.kind, WorldLocationKind.physicalClub);
+    final source = _Source(WorldSnapshot(cities: [const WorldCity(id: 'haifa',
+      name: 'Haifa', latitude: 32.794, longitude: 34.9896)], locations: [location]));
+    final view = WorldView(source: source, onIntent: (intent) async {});
+    expect(view, isA<Widget>());
+    expect(view.canCreateClub, isFalse);
+    expect(() => projectOrganization(dto, cityId: 'haifa', district: CityDistrict.north,
+      plot: 0, address: ''), throwsArgumentError);
+  });
+}
+class _Source implements WorldDataSource {
+  _Source(this.snapshot);
+  final WorldSnapshot snapshot;
+  @override
+  Stream<WorldSnapshot> watch() => Stream.value(snapshot);
+}

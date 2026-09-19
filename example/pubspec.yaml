@@ -1,0 +1,22 @@
+name: world_playground
+description: "Standalone playground for the World package."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.12.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  world:
+    path: ..
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

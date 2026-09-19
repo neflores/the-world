@@ -1,0 +1,33 @@
+import 'package:altar_tabletop_api_transport/altar_tabletop_api_transport.dart';
+import 'package:world/world.dart';
+
+/// Example host adapter compiled against the real generated Altar DTO.
+/// City, direction, plot, address and appearance are a separate safe projection:
+/// PublicOrganizationProfile currently does not contain those fields.
+WorldLocation projectOrganization(
+  PublicOrganizationProfile profile, {
+  required String cityId,
+  required CityDistrict district,
+  required int plot,
+  required String address,
+  WorldAppearance appearance = const WorldAppearance(),
+}) {
+  if (profile.kind == OrganizationKind.unknownDefaultOpenApi) {
+    throw ArgumentError('Unsupported organization kind');
+  }
+  final physical = profile.kind == OrganizationKind.physicalClub;
+  if (physical && address.trim().isEmpty) {
+    throw ArgumentError('Physical club address is required');
+  }
+  return WorldLocation(
+    id: profile.organizationProfileId,
+    cityId: cityId,
+    name: profile.displayName,
+    description: profile.shortDescription,
+    kind: physical ? WorldLocationKind.physicalClub : WorldLocationKind.community,
+    address: address,
+    district: district,
+    plot: plot,
+    appearance: appearance,
+  );
+}
