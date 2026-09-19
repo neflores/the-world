@@ -47,6 +47,7 @@ class WorldHostCapabilities {
     return switch (intent) {
       CreateWorldClub() => canCreateOrganization,
       ApplyWorldAppearance() => canEditAppearance,
+      RequestWorldAppearanceUnlock() => canEditAppearance,
       SetWorldStatus() => canUsePresence,
       SetWorldFavorite() => true,
       OpenWorldDestination(:final destination) =>

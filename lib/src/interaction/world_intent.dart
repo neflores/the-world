@@ -36,6 +36,11 @@ class ApplyWorldAppearance extends WorldIntent {
   final WorldAppearance appearance;
 }
 
+class RequestWorldAppearanceUnlock extends WorldIntent {
+  const RequestWorldAppearanceUnlock(this.locationId, this.optionId);
+  final String locationId, optionId;
+}
+
 class SetWorldStatus extends WorldIntent {
   const SetWorldStatus(this.status);
   final SocialStatus status;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'appearance_renderer.dart';
 import 'atlas_scene.dart';
 import 'drawing.dart';
+import 'scene_pin.dart';
+import 'prop_renderer.dart';
 
 class PinPainter extends CustomPainter {
   PinPainter(this.scene, this.selected, this.hovered);
@@ -38,13 +40,17 @@ class PinPainter extends CustomPainter {
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
         );
       }
-      drawAppearance(
-        canvas,
-        scene.assets,
-        pin.appearance,
-        pin.position,
-        pin.height,
-      );
+      if (pin.kind == ScenePinKind.portal) {
+        drawProp(canvas, scene.assets, WorldProp.portal, pin.artRect);
+      } else {
+        drawAppearance(
+          canvas,
+          scene.assets,
+          pin.appearance,
+          pin.position,
+          pin.height,
+        );
+      }
       final rect = pin.labelRect;
       canvas.drawRRect(
         RRect.fromRectAndRadius(

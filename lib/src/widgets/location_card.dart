@@ -29,6 +29,7 @@ class LocationCard extends StatelessWidget {
               child: WorldAppearancePreview(appearance: location.appearance),
             ),
             Text(location.description),
+            Text('Status: ${location.operationalState.name}'),
             const SizedBox(height: 12),
             Text('${location.district.label} district'),
             if (location.address.isNotEmpty) Text(location.address),

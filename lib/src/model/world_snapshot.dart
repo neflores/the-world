@@ -11,12 +11,17 @@ class WorldSnapshot {
     List<WorldRecruitment> recruitment = const [],
     this.status = SocialStatus.browsing,
     this.isSimulation = false,
+    this.schemaVersion = 1,
+    this.revision = 0,
   }) : cities = List.unmodifiable(cities),
        locations = List.unmodifiable(locations),
        people = List.unmodifiable(
          people.where((p) => p.status != SocialStatus.hidden),
        ),
        recruitment = List.unmodifiable(recruitment) {
+    if (schemaVersion != 1) {
+      throw ArgumentError('Unsupported World projection schema');
+    }
     final cityIds = this.cities.map((c) => c.id).toSet();
     if (cityIds.length != this.cities.length) {
       throw ArgumentError('Duplicate city IDs');
@@ -48,6 +53,7 @@ class WorldSnapshot {
   final List<WorldRecruitment> recruitment;
   final SocialStatus status;
   final bool isSimulation;
+  final int schemaVersion, revision;
   List<WorldLocation> inCity(String id) =>
       locations.where((l) => l.cityId == id).toList();
   WorldSnapshot copyWith({
@@ -55,12 +61,16 @@ class WorldSnapshot {
     List<WorldPresence>? people,
     List<WorldRecruitment>? recruitment,
     SocialStatus? status,
+    List<WorldCity>? cities,
+    int? revision,
   }) => WorldSnapshot(
-    cities: cities,
+    cities: cities ?? this.cities,
     locations: locations ?? this.locations,
     people: people ?? this.people,
     recruitment: recruitment ?? this.recruitment,
     status: status ?? this.status,
     isSimulation: isSimulation,
+    schemaVersion: schemaVersion,
+    revision: revision ?? this.revision + 1,
   );
 }

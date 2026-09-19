@@ -1,7 +1,8 @@
 import 'city_district.dart';
 import 'world_appearance.dart';
+import 'world_operational_state.dart';
 
-enum WorldLocationKind { physicalClub, community, master, craft }
+enum WorldLocationKind { physicalClub, community, master, creator }
 
 class WorldLocation {
   const WorldLocation({
@@ -16,6 +17,8 @@ class WorldLocation {
     this.appearance = const WorldAppearance(),
     this.isDemo = false,
     this.isFavorite = false,
+    this.operationalState = WorldOperationalState.open,
+    this.representativeId,
   });
 
   /// Stable ecosystem organization/professional ID. Never a list index or Fluxer ID.
@@ -28,22 +31,31 @@ class WorldLocation {
   final WorldLocationKind kind;
   final WorldAppearance appearance;
   final bool isDemo, isFavorite;
+  final WorldOperationalState operationalState;
+
+  /// Professional/organization representative; not the owner's personal avatar.
+  final String? representativeId;
   int get neighborhood => plot ~/ district.plotsPerNeighborhood;
 
-  WorldLocation copyWith({WorldAppearance? appearance, bool? isFavorite}) =>
-      WorldLocation(
-        id: id,
-        cityId: cityId,
-        name: name,
-        district: district,
-        plot: plot,
-        address: address,
-        description: description,
-        kind: kind,
-        appearance: appearance ?? this.appearance,
-        isDemo: isDemo,
-        isFavorite: isFavorite ?? this.isFavorite,
-      );
+  WorldLocation copyWith({
+    WorldAppearance? appearance,
+    bool? isFavorite,
+    WorldOperationalState? operationalState,
+  }) => WorldLocation(
+    id: id,
+    cityId: cityId,
+    name: name,
+    district: district,
+    plot: plot,
+    address: address,
+    description: description,
+    kind: kind,
+    appearance: appearance ?? this.appearance,
+    isDemo: isDemo,
+    isFavorite: isFavorite ?? this.isFavorite,
+    operationalState: operationalState ?? this.operationalState,
+    representativeId: representativeId,
+  );
 
   Map<String, Object> toJson() => {
     'id': id,
@@ -57,6 +69,8 @@ class WorldLocation {
     'appearance': appearance.toJson(),
     'isDemo': isDemo,
     'isFavorite': isFavorite,
+    'operationalState': operationalState.name,
+    'representativeId': ?representativeId,
   };
   factory WorldLocation.fromJson(Map<String, dynamic> json) => WorldLocation(
     id: json['id'] as String,
@@ -66,11 +80,17 @@ class WorldLocation {
     plot: json['plot'] as int,
     address: json['address'] as String? ?? '',
     description: json['description'] as String? ?? '',
-    kind: WorldLocationKind.values.byName(json['kind'] as String),
+    kind: WorldLocationKind.values.byName(
+      json['kind'] == 'craft' ? 'creator' : json['kind'] as String,
+    ),
     appearance: WorldAppearance.fromJson(
       json['appearance'] as Map<String, dynamic>,
     ),
     isDemo: json['isDemo'] as bool? ?? false,
     isFavorite: json['isFavorite'] as bool? ?? false,
+    operationalState: WorldOperationalState.values.byName(
+      json['operationalState'] as String? ?? 'open',
+    ),
+    representativeId: json['representativeId'] as String?,
   );
 }

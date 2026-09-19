@@ -109,6 +109,8 @@ class SimulationWorldDataSource implements WorldDataSource {
           next = next.copyWith(status: status);
         case OpenWorldDestination():
           return;
+        case RequestWorldAppearanceUnlock():
+          throw UnsupportedError('Unlock flow belongs to the host');
       }
       // Commit only after durable save succeeds; a failure keeps the form open.
       await persist?.call(encode(next));

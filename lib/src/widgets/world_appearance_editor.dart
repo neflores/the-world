@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../interaction/world_intent.dart';
 import '../model/world_appearance.dart';
+import '../model/world_appearance_option.dart';
 import 'appearance_controls.dart';
 
 /// Host opens this only after checking editing permissions.
@@ -9,11 +10,13 @@ class WorldAppearanceEditor extends StatefulWidget {
     required this.locationId,
     required this.initialAppearance,
     required this.onIntent,
+    this.options = const [],
     super.key,
   });
   final String locationId;
   final WorldAppearance initialAppearance;
   final WorldIntentHandler onIntent;
+  final List<WorldAppearanceOption> options;
   @override
   State<WorldAppearanceEditor> createState() => _WorldAppearanceEditorState();
 }
@@ -57,6 +60,41 @@ class _WorldAppearanceEditorState extends State<WorldAppearanceEditor> {
                     ? null
                     : (value) => setState(() => _value = value),
               ),
+              for (final option in widget.options)
+                ListTile(
+                  title: Text(option.label),
+                  leading: Icon(
+                    option.available
+                        ? Icons.check_circle_outline
+                        : Icons.lock_outline,
+                  ),
+                  subtitle: Text(
+                    option.available ? 'Available' : 'Locked · request in host',
+                  ),
+                  onTap: _saving
+                      ? null
+                      : () async {
+                          if (option.available) {
+                            setState(() => _value = option.appearance);
+                          } else {
+                            try {
+                              await widget.onIntent(
+                                RequestWorldAppearanceUnlock(
+                                  widget.locationId,
+                                  option.id,
+                                ),
+                              );
+                            } catch (_) {
+                              if (mounted) {
+                                setState(
+                                  () => _error =
+                                      'Unlock request unavailable. Please retry in the host.',
+                                );
+                              }
+                            }
+                          }
+                        },
+                ),
               if (_error != null) Text(_error!),
             ],
           ),

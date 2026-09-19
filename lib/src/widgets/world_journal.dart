@@ -71,6 +71,22 @@ class WorldJournal extends StatelessWidget {
               ),
             ),
           ),
+          if (city != null && city!.glory.level > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'City Glory ${city!.glory.level} · ${city!.glory.title}',
+                  ),
+                  LinearProgressIndicator(
+                    value: city!.glory.progress,
+                    semanticsLabel: 'City Glory progress',
+                  ),
+                ],
+              ),
+            ),
           if (city != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),

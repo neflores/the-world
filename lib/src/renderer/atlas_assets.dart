@@ -14,14 +14,16 @@ class AtlasAssets {
     this.adventurers,
     this.terrain,
     this.boundary,
+    this.props,
   );
   void dispose() {
     environments.dispose();
     adventurers.dispose();
     terrain.dispose();
+    props.dispose();
   }
 
-  final ui.Image environments, adventurers, terrain;
+  final ui.Image environments, adventurers, terrain, props;
   final List<List<GeoPoint>> boundary;
   static Future<ByteData> bytes(String path) async {
     try {
@@ -43,7 +45,7 @@ class AtlasAssets {
     }
 
     final images = await Future.wait(
-      ['environments', 'adventurers', 'terrain'].map(image),
+      ['environments', 'adventurers', 'terrain', 'world_props'].map(image),
     );
     final region =
         jsonDecode(await string('assets/geography/region.json'))
@@ -66,6 +68,6 @@ class AtlasAssets {
         }
       }
     }
-    return AtlasAssets(images[0], images[1], images[2], rings);
+    return AtlasAssets(images[0], images[1], images[2], rings, images[3]);
   }
 }

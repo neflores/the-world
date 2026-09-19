@@ -86,7 +86,7 @@ Future<void> showPlaygroundDestination(
                 for (final l
                     in snapshot
                         .inCity(intent.entityId)
-                        .where((l) => l.kind == WorldLocationKind.craft))
+                        .where((l) => l.kind == WorldLocationKind.creator))
                   ListTile(title: Text(l.name), subtitle: Text(l.description)),
               if (intent.destination == WorldDestination.communityBoard)
                 const Text(

@@ -62,6 +62,78 @@ class AppearanceControls extends StatelessWidget {
           ),
         ],
       ),
+      DropdownButtonFormField<WorldTheme>(
+        initialValue: value.theme,
+        decoration: const InputDecoration(labelText: 'Theme'),
+        items: [
+          for (final theme in WorldTheme.values)
+            DropdownMenuItem(value: theme, child: Text(theme.name)),
+        ],
+        onChanged: onChanged == null
+            ? null
+            : (v) => onChanged!(value.copyWith(theme: v)),
+      ),
+      DropdownButtonFormField<WorldTier>(
+        initialValue: value.tier,
+        decoration: const InputDecoration(labelText: 'Visual tier'),
+        items: [
+          for (final tier in WorldTier.values)
+            DropdownMenuItem(value: tier, child: Text(tier.name)),
+        ],
+        onChanged: onChanged == null
+            ? null
+            : (v) => onChanged!(value.copyWith(tier: v)),
+      ),
+      Wrap(
+        spacing: 8,
+        children: [
+          FilterChip(
+            label: const Text('Lantern'),
+            selected: value.slots.lighting,
+            onSelected: onChanged == null
+                ? null
+                : (v) => onChanged!(
+                    value.copyWith(slots: value.slots.copyWith(lighting: v)),
+                  ),
+          ),
+          FilterChip(
+            label: const Text('Trophy'),
+            selected: value.slots.trophy,
+            onSelected: onChanged == null
+                ? null
+                : (v) => onChanged!(
+                    value.copyWith(slots: value.slots.copyWith(trophy: v)),
+                  ),
+          ),
+          FilterChip(
+            label: const Text('Dragon mascot'),
+            selected: value.slots.mascot,
+            onSelected: onChanged == null
+                ? null
+                : (v) => onChanged!(
+                    value.copyWith(slots: value.slots.copyWith(mascot: v)),
+                  ),
+          ),
+          FilterChip(
+            label: const Text('Notice board'),
+            selected: value.slots.wall,
+            onSelected: onChanged == null
+                ? null
+                : (v) => onChanged!(
+                    value.copyWith(slots: value.slots.copyWith(wall: v)),
+                  ),
+          ),
+          FilterChip(
+            label: const Text('Patio table'),
+            selected: value.slots.floor,
+            onSelected: onChanged == null
+                ? null
+                : (v) => onChanged!(
+                    value.copyWith(slots: value.slots.copyWith(floor: v)),
+                  ),
+          ),
+        ],
+      ),
     ],
   );
 }
