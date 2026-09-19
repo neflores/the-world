@@ -5,8 +5,9 @@ import 'package:world/world.dart';
 Future<void> showPlaygroundDestination(
   BuildContext context,
   WorldSnapshot snapshot,
-  OpenWorldDestination intent,
-) async {
+  OpenWorldDestination intent, {
+  WorldClock clock = const SystemWorldClock(),
+}) async {
   final location = snapshot.locations
       .where((l) => l.id == intent.entityId)
       .firstOrNull;
@@ -16,7 +17,7 @@ Future<void> showPlaygroundDestination(
   final games = snapshot.recruitment
       .where(
         (g) =>
-            g.isPublicAt(DateTime.now()) &&
+            g.isPublicAt(clock.now()) &&
             (intent.destination == WorldDestination.online
                 ? g.isOnline
                 : !g.isOnline &&

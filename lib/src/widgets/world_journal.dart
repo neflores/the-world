@@ -3,6 +3,8 @@ import '../model/world_city.dart';
 import '../model/world_location.dart';
 import '../model/world_presence.dart';
 import '../model/world_snapshot.dart';
+import '../runtime/world_runtime.dart';
+import '../runtime/world_render_policy.dart';
 
 class WorldJournal extends StatelessWidget {
   const WorldJournal({
@@ -151,13 +153,22 @@ class WorldJournal extends StatelessWidget {
                       subtitle: Text('App activity, not physical presence'),
                     ),
                     for (final p
-                        in snapshot.people
-                            .where(
-                              (p) =>
-                                  p.contextId == city!.id &&
-                                  p.opacityAt(DateTime.now()) > 0,
-                            )
-                            .take(14))
+                        in (WorldRuntimeData.maybeOf(context)?.policy ??
+                                const WorldRenderPolicy())
+                            .sample(
+                              snapshot.people.where(
+                                (p) =>
+                                    p.contextId == city!.id &&
+                                    p.opacityAt(
+                                          WorldRuntimeData.timeOf(context),
+                                        ) >
+                                        0,
+                              ),
+                              WorldRuntimeData.timeOf(context),
+                              viewerId: WorldRuntimeData.maybeOf(
+                                context,
+                              )?.viewerId,
+                            ))
                       ListTile(
                         leading: const Icon(Icons.person_outline),
                         title: Text(p.name),

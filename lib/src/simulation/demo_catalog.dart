@@ -1,6 +1,7 @@
 import '../model/city_district.dart';
 import '../model/world_appearance.dart';
 import '../model/world_city.dart';
+import '../runtime/world_clock.dart';
 import '../model/world_location.dart';
 import '../model/world_presence.dart';
 import '../model/world_recruitment.dart';
@@ -72,7 +73,7 @@ const demoCities = [
 ];
 
 WorldSnapshot createDemoSnapshot({DateTime? now}) {
-  final time = now ?? DateTime.now();
+  final time = now ?? const SystemWorldClock().now();
   final locations = <WorldLocation>[];
   for (final city in demoCities) {
     for (var i = 0; i < 5; i++) {

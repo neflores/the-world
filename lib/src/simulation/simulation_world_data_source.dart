@@ -7,11 +7,16 @@ import '../model/world_location.dart';
 import '../model/world_presence.dart';
 import '../model/world_snapshot.dart';
 import 'demo_catalog.dart';
+import '../runtime/world_clock.dart';
 
 /// Fixture provider. Production never falls back to this source implicitly.
 class SimulationWorldDataSource implements WorldDataSource {
-  SimulationWorldDataSource({String? savedState, this.persist, DateTime? now})
-    : _snapshot = createDemoSnapshot(now: now) {
+  SimulationWorldDataSource({
+    String? savedState,
+    this.persist,
+    DateTime? now,
+    this.clock = const SystemWorldClock(),
+  }) : _snapshot = createDemoSnapshot(now: now ?? clock.now()) {
     if (savedState != null) {
       final json = jsonDecode(savedState) as Map<String, dynamic>;
       if (json['version'] != 1) {
@@ -26,6 +31,16 @@ class SimulationWorldDataSource implements WorldDataSource {
     }
   }
   final Future<void> Function(String state)? persist;
+  final WorldClock clock;
+  int _sequence = 0;
+  String _nextId() {
+    String id;
+    do {
+      id = 'local-${clock.now().microsecondsSinceEpoch}-${_sequence++}';
+    } while (_snapshot.locations.any((l) => l.id == id));
+    return id;
+  }
+
   final _changes = StreamController<WorldSnapshot>.broadcast(sync: true);
   WorldSnapshot _snapshot;
   Future<void> _pending = Future<void>.value();
@@ -64,7 +79,7 @@ class SimulationWorldDataSource implements WorldDataSource {
               .map((l) => l.plot);
           final plot = plots.fold(-1, max) + 1;
           final location = WorldLocation(
-            id: 'local-${DateTime.now().microsecondsSinceEpoch}-${Random.secure().nextInt(1 << 32)}',
+            id: _nextId(),
             cityId: draft.cityId,
             name: draft.name.trim(),
             address: draft.address.trim(),

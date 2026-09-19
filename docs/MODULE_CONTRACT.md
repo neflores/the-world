@@ -23,3 +23,10 @@ objects are host-only and must be redacted before logging; UI displays safe text
 Never send credentials or private domain DTOs inside public World projections.
 
 No license is added: the owner explicitly deferred this decision on 2026-09-19.
+
+Inject `WorldClock` for server-aligned time; `ManualWorldClock` supports repeatable
+scenarios. Expiry refreshes every five seconds, or immediately when the manual
+clock changes, including open World dialogs. `WorldRenderPolicy` defines the
+avatar budget and motion policy. Sampling is stable across payload order, keeps
+the viewer first, and strips hidden/expired users. Hidden users must still be
+omitted by the backend; the snapshot's filtering is only defense in depth.

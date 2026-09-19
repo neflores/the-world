@@ -62,6 +62,7 @@ class _MainAppState extends State<MainApp> {
       builder: (context) => Scaffold(
         body: WorldModule(
           source: widget.source,
+          clock: widget.source.clock,
           host: const WorldHostContext(
             surface: WorldHostSurface.playground,
             viewerId: 'local-player',
@@ -75,6 +76,7 @@ class _MainAppState extends State<MainApp> {
                   context,
                   widget.source.snapshot,
                   intent,
+                  clock: widget.source.clock,
                 );
               } else {
                 await widget.source.handle(intent);

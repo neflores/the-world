@@ -13,7 +13,9 @@ class WorldSnapshot {
     this.isSimulation = false,
   }) : cities = List.unmodifiable(cities),
        locations = List.unmodifiable(locations),
-       people = List.unmodifiable(people),
+       people = List.unmodifiable(
+         people.where((p) => p.status != SocialStatus.hidden),
+       ),
        recruitment = List.unmodifiable(recruitment) {
     final cityIds = this.cities.map((c) => c.id).toSet();
     if (cityIds.length != this.cities.length) {

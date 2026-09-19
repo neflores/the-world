@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import '../model/world_presence.dart';
 import 'atlas_assets.dart';
 import 'atlas_scene.dart';
+import '../runtime/world_runtime.dart';
+import '../runtime/world_render_policy.dart';
+import '../runtime/stable_seed.dart';
 
 class NpcLayer extends StatefulWidget {
   const NpcLayer({
@@ -52,6 +55,7 @@ class _NpcLayerState extends State<NpcLayer>
   void _configureClock() {
     _still =
         widget.quiet ||
+        (WorldRuntimeData.maybeOf(context)?.policy.reduceMotion ?? false) ||
         MediaQuery.disableAnimationsOf(context) ||
         !TickerMode.valuesOf(context).enabled;
     if (_still) {
@@ -73,10 +77,12 @@ class _NpcLayerState extends State<NpcLayer>
     if (widget.quiet || widget.scene.routes.isEmpty) {
       return const SizedBox.shrink();
     }
-    final people = widget.people
-        .where((p) => p.opacityAt(DateTime.now()) > 0)
-        .take(14)
-        .toList();
+    final runtime = WorldRuntimeData.maybeOf(context);
+    final people = (runtime?.policy ?? const WorldRenderPolicy()).sample(
+      widget.people,
+      WorldRuntimeData.timeOf(context),
+      viewerId: runtime?.viewerId,
+    );
     return AnimatedBuilder(
       animation: _clock,
       builder: (context, _) {
@@ -84,7 +90,7 @@ class _NpcLayerState extends State<NpcLayer>
         return Stack(
           children: [
             for (var i = 0; i < people.length; i++)
-              _person(people[i], i, seconds),
+              _person(people[i], stableSeed(people[i].id), seconds),
           ],
         );
       },
@@ -110,7 +116,7 @@ class _NpcLayerState extends State<NpcLayer>
           child: GestureDetector(
             onTap: () => widget.onPerson(person),
             child: Opacity(
-              opacity: person.opacityAt(DateTime.now()),
+              opacity: person.opacityAt(WorldRuntimeData.timeOf(context)),
               child: CustomPaint(
                 painter: AvatarPainter(
                   widget.scene.assets,

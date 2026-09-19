@@ -3,16 +3,20 @@ import '../interaction/world_intent.dart';
 import '../model/world_location.dart';
 import '../model/world_snapshot.dart';
 import 'recruitment_table.dart';
+import '../runtime/world_clock.dart';
+import '../runtime/world_runtime.dart';
 
 class TavernHall extends StatelessWidget {
   const TavernHall({
     required this.location,
     required this.snapshot,
     required this.onAction,
+    this.clock = const SystemWorldClock(),
     super.key,
   });
   final WorldLocation location;
   final WorldSnapshot snapshot;
+  final WorldClock clock;
   final ValueChanged<OpenWorldDestination> onAction;
   @override
   Widget build(BuildContext context) {
@@ -22,7 +26,9 @@ class TavernHall extends StatelessWidget {
               (g) =>
                   g.locationId == location.id &&
                   !g.isOnline &&
-                  g.isPublicAt(DateTime.now()),
+                  g.isPublicAt(
+                    WorldRuntimeData.maybeOf(context)?.now ?? clock.now(),
+                  ),
             )
             .toList()
           ..sort((a, b) => a.startsAt.compareTo(b.startsAt));

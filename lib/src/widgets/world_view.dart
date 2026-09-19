@@ -22,6 +22,7 @@ import 'world_appearance_editor.dart';
 import 'world_journal.dart';
 import 'world_map_pane.dart';
 import 'world_toolbar.dart';
+import 'world_dialog.dart';
 
 /// Embeddable World tab. The host provides data, permissions and action handling.
 class WorldView extends StatefulWidget {
@@ -125,7 +126,7 @@ class _WorldViewState extends State<WorldView> {
   }
 
   Future<void> _addClub() async {
-    final cityId = await showDialog<String>(
+    final cityId = await showWorldDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (_) => ClubForm(
@@ -141,7 +142,7 @@ class _WorldViewState extends State<WorldView> {
     }
   }
 
-  void _person(WorldPresence person) => showDialog<void>(
+  void _person(WorldPresence person) => showWorldDialog<void>(
     context: context,
     builder: (dialogContext) => PersonCard(
       person: person,
@@ -160,7 +161,7 @@ class _WorldViewState extends State<WorldView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _mapKey.currentState?.focusPin(location.id);
     });
-    showDialog<void>(
+    showWorldDialog<void>(
       context: context,
       builder: (dialogContext) => ListenableBuilder(
         listenable: _controller,
@@ -191,7 +192,7 @@ class _WorldViewState extends State<WorldView> {
             onEdit: widget.canEditAppearance?.call(current) == true
                 ? () {
                     Navigator.pop(dialogContext);
-                    showDialog<void>(
+                    showWorldDialog<void>(
                       context: context,
                       barrierDismissible: false,
                       builder: (_) => WorldAppearanceEditor(
@@ -208,7 +209,7 @@ class _WorldViewState extends State<WorldView> {
     );
   }
 
-  void _hall(WorldLocation location) => showDialog<void>(
+  void _hall(WorldLocation location) => showWorldDialog<void>(
     context: context,
     builder: (dialogContext) => ListenableBuilder(
       listenable: _controller,
