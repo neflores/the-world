@@ -31,3 +31,29 @@ WorldLocation projectOrganization(
     appearance: appearance,
   );
 }
+
+/// Professional identity stays distinct from the owner's personal avatar.
+WorldLocation projectProfessional(
+  PublicProfessionalProfile profile, {
+  required String cityId,
+  required CityDistrict district,
+  required int plot,
+  WorldAppearance appearance = const WorldAppearance(),
+}) {
+  if (profile.kind == ProfessionalKind.unknownDefaultOpenApi) {
+    throw ArgumentError('Unsupported professional kind');
+  }
+  return WorldLocation(
+    id: profile.professionalProfileId,
+    cityId: cityId,
+    name: profile.displayName,
+    description: profile.shortDescription,
+    kind: profile.kind == ProfessionalKind.master
+        ? WorldLocationKind.master
+        : WorldLocationKind.creator,
+    district: district,
+    plot: plot,
+    appearance: appearance,
+    representativeId: 'professional:${profile.professionalProfileId}',
+  );
+}

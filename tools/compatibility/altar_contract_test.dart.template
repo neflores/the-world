@@ -24,6 +24,35 @@ void main() {
     expect(() => projectOrganization(dto, cityId: 'haifa', district: CityDistrict.north,
       plot: 0, address: ''), throwsArgumentError);
   });
+
+  test('current Altar Master and Creator concepts map without personal avatar IDs', () {
+    PublicProfessionalProfile profile(ProfessionalKind kind, String id) =>
+      PublicProfessionalProfile((b) => b
+        ..professionalProfileId = id
+        ..kind = kind
+        ..displayName = 'Professional fixture'
+        ..shortDescription = 'Public-safe projection'
+        ..layout = ProfileLayout.showcase);
+    final master = projectProfessional(profile(ProfessionalKind.master, 'master-1'),
+      cityId: 'haifa', district: CityDistrict.west, plot: 0);
+    final creator = projectProfessional(profile(ProfessionalKind.creator, 'creator-1'),
+      cityId: 'haifa', district: CityDistrict.northWest, plot: 0);
+    expect(master.kind, WorldLocationKind.master);
+    expect(creator.kind, WorldLocationKind.creator);
+    expect(master.representativeId, 'professional:master-1');
+    expect(master.address, isEmpty);
+  });
+
+  test('WorldModule mounts from public contracts without importing a host app', () {
+    final source = _Source(WorldSnapshot(cities: const [], locations: const []));
+    final module = WorldModule(
+      host: const WorldHostContext(surface: WorldHostSurface.playerApp, viewerId: 'viewer'),
+      capabilities: const WorldHostCapabilities(),
+      bridge: CallbackWorldHostBridge(onIntent: (_) async {}),
+      source: source,
+    );
+    expect(module, isA<Widget>());
+  });
 }
 class _Source implements WorldDataSource {
   _Source(this.snapshot);

@@ -21,8 +21,8 @@ World Full Vision и список из 33 недостающих функций.
 | H | Центральная площадь, мастера, Creator District, Favorites, discovery | задачи 9–13, 32 | Запланировано |
 | I | Доска, рисунки, bubbles, reactions, социальные действия | задачи 14–18 | Запланировано |
 | J | Время суток, сезоны, события, региональные связи, online languages | задачи 22–24, 26, 33 | Запланировано |
-| K | Детерминированные сценарии, golden/performance/CI, пять платформ | #2: 21–25, 48–49; задачи 8, 30 | Запланировано |
-| L | Адаптеры, совместимость, документы, release point | #2: 30–33, 50, 53–54; задачи 28–30 | Запланировано |
+| K | Детерминированные сценарии, golden/performance/CI, пять платформ | #2: 21–25, 48–49; задачи 8, 30 | Частично: deterministic tests, 100-update regression, Windows/Linux quality, Windows/Android builds; goldens/scenarios далее |
+| L | Адаптеры, совместимость, документы, release point | #2: 30–33, 50, 53–54; задачи 28–30 | Частично: pinned read-only Organization/Master/Creator contracts; реальный host adapter требует отдельного разрешения |
 | M | Лицензия | #2: 34 | Владелец решил пока не добавлять |
 
 Критерий завершения механики: доступна в Playground, использует общий runtime

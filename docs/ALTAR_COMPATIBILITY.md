@@ -12,7 +12,7 @@
   ClubManager и общие пакеты. Dart constraint — `^3.12.2`, CI Flutter — `3.44.2`.
 - World — встраиваемый Flutter package, публичные типы не зависят от Flame,
   Fluxer, собственного роутера или контейнера зависимостей.
-- `WorldView` принимает источник проекций и обработчик намерений.
+- `WorldModule` принимает host context, capabilities, bridge и источник проекций.
 - `PublicOrganizationProfile` содержит `organizationProfileId`, `kind`,
   `displayName`, `shortDescription`, `layout`. **Города, адреса, координат,
   размещения и World-оформления в этом DTO нет.**
@@ -20,6 +20,9 @@
   скомпилирован и проверен тестом с настоящим сгенерированным transport-пакетом
   host. ID и вид организации сохраняются. Пространственные поля приходят
   отдельными явными аргументами; отсутствующие поля не выдумываются.
+- Тот же контракт покрывает актуальный `PublicProfessionalProfile` с видами
+  `master` и `creator`. Профессиональный representative ID не подменяет личный
+  Player avatar ID.
 - Все обычные формы наследуют Theme/Directionality/MediaQuery host;
   map art имеет собственную палитру. Готовый языковой пакет host не импортируется.
 
@@ -48,14 +51,16 @@ git clone --depth 1 --filter=blob:none --no-checkout https://github.com/EriArk/A
    изменение оформления/избранного/статуса с проверкой permissions backend.
 4. Host-время, reconnect/expiry policy и выборку людей. Presence означает
    online/recent app context; это не физическое нахождение в клубе.
-5. Локализацию UI-текстов под общий localization package; сейчас UI на английском.
+5. Locale (`en`, `ru` или `he`) через host context; неизвестный locale использует
+   английский fallback. География карты не зеркалится в RTL.
 
 ## Границы проверки
 
 Контрактный тест выполнен на локальном Flutter **3.47.4** с реальными DTO host.
 Это подтверждает совместимость типов и способа встраивания, но **не** завершённую
 интеграцию с сервером, сессиями, Fluxer, навигацией и permissions AltarApps.
-На Flutter **3.44.2** host и на Android/iOS/macOS/Linux этот запуск ещё не проверен.
+CI настроен на Windows/Linux quality checks, Windows release и Android release.
+iOS/macOS требуют Apple runner и остаются отдельной будущей проверкой.
 Неиспользуемые сетевые/картографические зависимости убраны для уменьшения
 вероятности конфликтов. Полный host build не выполнялся и не изменялся.
 

@@ -5,8 +5,12 @@ on:
 permissions:
   contents: read
 jobs:
-  flutter:
-    runs-on: windows-latest
+  quality:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -17,5 +21,46 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+
+  windows-build:
+    needs: quality
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: example
       - run: flutter build windows --release
         working-directory: example
+
+  android-build:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: example
+      - run: flutter build apk --release
+        working-directory: example
+
+  altar-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.4'
+          channel: stable
+          cache: true
+      - run: git clone --filter=blob:none --no-checkout https://github.com/EriArk/AltarAppsReborn.git .compatibility/AltarAppsReborn
+      - shell: pwsh
+        run: ./tools/verify-altar-compatibility.ps1
