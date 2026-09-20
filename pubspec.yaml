@@ -19,5 +19,9 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/art/
+    - assets/art/environments.png
+    - assets/art/adventurers.png
+    - assets/art/terrain.png
+    - assets/art/tavern_hall.png
+    - assets/art/world_props.png
     - assets/geography/region.json
