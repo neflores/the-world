@@ -7,6 +7,7 @@ export 'src/module/world_host_capabilities.dart';
 export 'src/module/world_host_bridge.dart';
 export 'src/module/world_diagnostic.dart';
 export 'src/module/world_module_state.dart';
+export 'src/localization/world_strings.dart';
 export 'src/runtime/world_clock.dart';
 export 'src/runtime/world_render_policy.dart';
 

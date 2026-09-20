@@ -36,3 +36,10 @@ omitted by the backend; the snapshot's filtering is only defense in depth.
 between region, City and location contexts. Coordinates and autonomous avatar
 behavior remain renderer-owned. `ApplyWorldAvatar` carries cosmetic choices;
 the host owns identity, entitlement and durable production storage.
+
+The host selects `localeTag` on `WorldHostContext`. World currently recognizes
+English (`en`), Russian (`ru`) and Hebrew (`he`), falling back to English.
+Hebrew applies RTL to Flutter chrome and dialogs; scene coordinates, Israel's
+geography and camera controls are never mirrored. `WorldRenderPolicy` also lets
+the host cap avatar count/FPS, reduce motion, request quiet mode and identify a
+simplified-background preference.

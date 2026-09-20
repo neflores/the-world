@@ -8,6 +8,7 @@ import 'atlas_scene.dart';
 import '../runtime/world_runtime.dart';
 import '../runtime/world_render_policy.dart';
 import '../runtime/stable_seed.dart';
+import '../localization/world_strings.dart';
 
 class NpcLayer extends StatefulWidget {
   const NpcLayer({
@@ -25,21 +26,11 @@ class NpcLayer extends StatefulWidget {
   State<NpcLayer> createState() => _NpcLayerState();
 }
 
-class _NpcLayerState extends State<NpcLayer>
-    with SingleTickerProviderStateMixin {
-  late final _clock = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 120),
-  );
-  Timer? _expiry;
+class _NpcLayerState extends State<NpcLayer> {
+  Timer? _clock;
+  double _seconds = 0;
+  int _fps = 0;
   bool _still = false;
-  @override
-  void initState() {
-    super.initState();
-    _expiry = Timer.periodic(const Duration(seconds: 10), (_) {
-      if (mounted) setState(() {});
-    });
-  }
 
   @override
   void didChangeDependencies() {
@@ -54,51 +45,60 @@ class _NpcLayerState extends State<NpcLayer>
   }
 
   void _configureClock() {
+    final policy = WorldRuntimeData.maybeOf(context)?.policy;
     _still =
         widget.quiet ||
-        (WorldRuntimeData.maybeOf(context)?.policy.reduceMotion ?? false) ||
+        (policy?.quiet ?? false) ||
+        (policy?.reduceMotion ?? false) ||
         MediaQuery.disableAnimationsOf(context) ||
         !TickerMode.valuesOf(context).enabled;
     if (_still) {
-      _clock.stop();
-    } else if (!_clock.isAnimating) {
-      _clock.repeat();
+      _clock?.cancel();
+      _clock = null;
+      _fps = 0;
+    } else {
+      final nextFps = (policy?.framesPerSecond ?? 30).clamp(1, 60);
+      if (_clock != null && _fps == nextFps) return;
+      _clock?.cancel();
+      _fps = nextFps;
+      final tick = Duration(microseconds: 1000000 ~/ nextFps);
+      _clock = Timer.periodic(tick, (_) {
+        if (!mounted) return;
+        setState(() => _seconds = (_seconds + 1 / nextFps) % 120);
+      });
     }
   }
 
   @override
   void dispose() {
-    _expiry?.cancel();
-    _clock.dispose();
+    _clock?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.quiet || widget.scene.routes.isEmpty) {
+    final runtime = WorldRuntimeData.maybeOf(context);
+    if (widget.quiet ||
+        (runtime?.policy.quiet ?? false) ||
+        widget.scene.routes.isEmpty) {
       return const SizedBox.shrink();
     }
-    final runtime = WorldRuntimeData.maybeOf(context);
     final people = (runtime?.policy ?? const WorldRenderPolicy()).sample(
       widget.people,
       WorldRuntimeData.timeOf(context),
       viewerId: runtime?.viewerId,
     );
-    return AnimatedBuilder(
-      animation: _clock,
-      builder: (context, _) {
-        final seconds = _still ? 0.0 : _clock.value * 120;
-        return Stack(
-          children: [
-            for (var i = 0; i < people.length; i++)
-              _person(people[i], stableSeed(people[i].id), seconds),
-          ],
-        );
-      },
+    final seconds = _still ? 0.0 : _seconds;
+    return Stack(
+      children: [
+        for (var i = 0; i < people.length; i++)
+          _person(people[i], stableSeed(people[i].id), seconds),
+      ],
     );
   }
 
   Widget _person(WorldPresence person, int i, double seconds) {
+    final statusLabel = WorldLocalization.of(context).status(person.status);
     final route = widget.scene.routes[i % widget.scene.routes.length];
     // Presentation behavior is deterministic and remains client-side.
     final behaviorTime = (seconds + i % 17) % 22;
@@ -116,9 +116,9 @@ class _NpcLayerState extends State<NpcLayer>
       height: 75,
       child: Semantics(
         button: true,
-        label: '${person.name}, ${person.status.label}',
+        label: '${person.name}, $statusLabel',
         child: Tooltip(
-          message: '${person.name} · ${person.status.label}',
+          message: '${person.name} · $statusLabel',
           child: GestureDetector(
             onTap: () => widget.onPerson(person),
             child: Opacity(

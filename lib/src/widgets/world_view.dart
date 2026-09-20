@@ -26,6 +26,7 @@ import 'world_map_pane.dart';
 import 'world_toolbar.dart';
 import 'world_dialog.dart';
 import 'world_avatar_editor.dart';
+import '../localization/world_strings.dart';
 
 /// Embeddable World tab. The host provides data, permissions and action handling.
 class WorldView extends StatefulWidget {
@@ -126,9 +127,7 @@ class _WorldViewState extends State<WorldView> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to complete this action. Please retry.'),
-          ),
+          SnackBar(content: Text(WorldLocalization.of(context).get('retry'))),
         );
       }
     }
@@ -310,8 +309,8 @@ class _WorldViewState extends State<WorldView> {
     listenable: _controller,
     builder: (context, _) {
       if (_controller.error != null && _controller.snapshot == null) {
-        return const Center(
-          child: Text('Unable to load World. Reconnect and try again.'),
+        return Center(
+          child: Text(WorldLocalization.of(context).get('loadError')),
         );
       }
       final snapshot = _controller.snapshot;
@@ -322,8 +321,8 @@ class _WorldViewState extends State<WorldView> {
         future: _loading,
         builder: (context, art) {
           if (art.hasError) {
-            return const Center(
-              child: Text('Unable to load the atlas artwork.'),
+            return Center(
+              child: Text(WorldLocalization.of(context).get('artError')),
             );
           }
           if (!art.hasData) {
@@ -379,9 +378,9 @@ class _WorldViewState extends State<WorldView> {
                               : null,
                         ),
                         if (_controller.error != null)
-                          const Text(
-                            'Connection interrupted. Showing the last received state.',
-                            style: TextStyle(color: Colors.amber),
+                          Text(
+                            WorldLocalization.of(context).get('stale'),
+                            style: const TextStyle(color: Colors.amber),
                           ),
                         const SizedBox(height: 12),
                         if (city != null)
@@ -391,7 +390,11 @@ class _WorldViewState extends State<WorldView> {
                                 key: const ValueKey('map-back'),
                                 onPressed: () => _selectCity(null),
                                 icon: const Icon(Icons.arrow_back),
-                                label: const Text('All Israel'),
+                                label: Text(
+                                  WorldLocalization.of(
+                                    context,
+                                  ).get('allIsrael'),
+                                ),
                               ),
                               Expanded(
                                 child: Text(
@@ -403,7 +406,9 @@ class _WorldViewState extends State<WorldView> {
                               ),
                               if (!listOnly) ...[
                                 IconButton(
-                                  tooltip: 'Previous neighborhood',
+                                  tooltip: WorldLocalization.of(
+                                    context,
+                                  ).get('previousArea'),
                                   onPressed: _neighborhood > 0
                                       ? () => setState(() => _neighborhood--)
                                       : null,
@@ -414,7 +419,9 @@ class _WorldViewState extends State<WorldView> {
                                   style: const TextStyle(color: Colors.white),
                                 ),
                                 IconButton(
-                                  tooltip: 'Next neighborhood',
+                                  tooltip: WorldLocalization.of(
+                                    context,
+                                  ).get('nextArea'),
                                   onPressed:
                                       snapshot
                                           .inCity(city.id)

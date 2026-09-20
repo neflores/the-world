@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../module/world_scope.dart';
 import '../runtime/world_runtime.dart';
+import '../localization/world_strings.dart';
 
 /// Dialog routes are outside the embedding subtree. Carry World's context over
 /// the Navigator boundary, including the same live clock and host identity.
@@ -11,6 +12,7 @@ Future<T?> showWorldDialog<T>({
 }) {
   final runtime = WorldRuntimeData.maybeOf(context);
   final scope = WorldScope.maybeOf(context);
+  final localization = WorldLocalization.maybeOf(context);
   return showDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
@@ -30,6 +32,12 @@ Future<T?> showWorldDialog<T>({
           capabilities: scope.capabilities,
           bridge: scope.bridge,
           child: child,
+        );
+      }
+      if (localization != null) {
+        child = Directionality(
+          textDirection: localization.strings.direction,
+          child: WorldLocalization(strings: localization.strings, child: child),
         );
       }
       return child;

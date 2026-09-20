@@ -7,10 +7,12 @@ class WorldHostContext {
     this.professionalId,
     this.organizationId,
     this.environment = 'production',
+    this.localeTag = 'en',
   });
   final WorldHostSurface surface;
 
   /// Ecosystem identity, never a Fluxer identity/token.
   final String? viewerId, professionalId, organizationId;
   final String environment;
+  final String localeTag;
 }

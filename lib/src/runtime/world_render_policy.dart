@@ -7,9 +7,10 @@ class WorldRenderPolicy {
     this.framesPerSecond = 30,
     this.reduceMotion = false,
     this.quiet = false,
+    this.simplifiedBackground = false,
   });
   final int maxAvatars, framesPerSecond;
-  final bool reduceMotion, quiet;
+  final bool reduceMotion, quiet, simplifiedBackground;
 
   /// Deterministic, input-order independent and self-first. Visibility is also
   /// checked here as defense in depth; the host must omit hidden users upstream.

@@ -10,6 +10,7 @@ import 'world_scope.dart';
 import '../runtime/world_clock.dart';
 import '../runtime/world_runtime.dart';
 import '../runtime/world_render_policy.dart';
+import '../localization/world_strings.dart';
 
 /// Stable embedding boundary for Player App, MasterHub, ClubManager and review.
 class WorldModule extends StatefulWidget {
@@ -48,24 +49,34 @@ class _WorldModuleState extends State<WorldModule> {
   }
 
   @override
-  Widget build(BuildContext context) => WorldScope(
-    host: widget.host,
-    capabilities: widget.capabilities,
-    bridge: widget.bridge,
-    child: widget.capabilities.canView
-        ? WorldRuntime(
-            clock: widget.clock,
-            policy: widget.renderPolicy,
-            viewerId: widget.host.viewerId,
-            child: WorldView(
-              source: widget.source,
-              onIntent: _dispatch,
-              onDiagnostic: widget.bridge.diagnostic,
-              capabilities: widget.capabilities,
-              canCreateClub: widget.capabilities.canCreateOrganization,
-              canEditAppearance: (_) => widget.capabilities.canEditAppearance,
-            ),
-          )
-        : const Center(child: Text('World is not available in this context.')),
-  );
+  Widget build(BuildContext context) {
+    final strings = WorldStrings.forTag(widget.host.localeTag);
+    return Directionality(
+      textDirection: strings.direction,
+      child: WorldLocalization(
+        strings: strings,
+        child: WorldScope(
+          host: widget.host,
+          capabilities: widget.capabilities,
+          bridge: widget.bridge,
+          child: widget.capabilities.canView
+              ? WorldRuntime(
+                  clock: widget.clock,
+                  policy: widget.renderPolicy,
+                  viewerId: widget.host.viewerId,
+                  child: WorldView(
+                    source: widget.source,
+                    onIntent: _dispatch,
+                    onDiagnostic: widget.bridge.diagnostic,
+                    capabilities: widget.capabilities,
+                    canCreateClub: widget.capabilities.canCreateOrganization,
+                    canEditAppearance: (_) =>
+                        widget.capabilities.canEditAppearance,
+                  ),
+                )
+              : Center(child: Text(strings.get('restricted'))),
+        ),
+      ),
+    );
+  }
 }

@@ -5,6 +5,7 @@ import '../model/world_presence.dart';
 import '../model/world_snapshot.dart';
 import '../runtime/world_runtime.dart';
 import '../runtime/world_render_policy.dart';
+import '../localization/world_strings.dart';
 
 class WorldJournal extends StatelessWidget {
   const WorldJournal({
@@ -31,6 +32,7 @@ class WorldJournal extends StatelessWidget {
   final ValueChanged<WorldPresence> onPerson;
   @override
   Widget build(BuildContext context) {
+    final strings = WorldLocalization.of(context);
     final query = search.toLowerCase();
     final locations = city == null
         ? <WorldLocation>[]
@@ -55,7 +57,7 @@ class WorldJournal extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Text(
-              city?.name ?? 'The atlas of Israel',
+              city?.name ?? strings.get('atlas'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
@@ -67,7 +69,9 @@ class WorldJournal extends StatelessWidget {
               decoration: InputDecoration(
                 isDense: true,
                 prefixIcon: const Icon(Icons.search),
-                hintText: city == null ? 'Find a city' : 'Find a place',
+                hintText: city == null
+                    ? strings.get('findCity')
+                    : strings.get('findPlace'),
               ),
             ),
           ),
@@ -93,7 +97,7 @@ class WorldJournal extends StatelessWidget {
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: FilterChip(
-                  label: const Text('Favorites'),
+                  label: Text(strings.get('favorites')),
                   selected: favoritesOnly,
                   onSelected: onFavorites,
                 ),
@@ -111,13 +115,13 @@ class WorldJournal extends StatelessWidget {
                       leading: const Icon(Icons.castle_outlined),
                       title: Text(c.name),
                       subtitle: Text(
-                        '${snapshot.inCity(c.id).length} places to discover',
+                        strings.places(snapshot.inCity(c.id).length),
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => onCity(c),
                     ),
                   if (cities.isEmpty)
-                    const ListTile(title: Text('No cities match your search.')),
+                    ListTile(title: Text(strings.get('noCities'))),
                 ] else ...[
                   const Padding(
                     padding: EdgeInsets.all(8),
@@ -132,15 +136,15 @@ class WorldJournal extends StatelessWidget {
                       runSpacing: 4,
                       children: [
                         ActionChip(
-                          label: const Text('Central Square'),
+                          label: Text(strings.get('centralSquare')),
                           onPressed: () => onLandmark('central-square'),
                         ),
                         ActionChip(
-                          label: const Text('Online Portal'),
+                          label: Text(strings.get('onlinePortal')),
                           onPressed: () => onLandmark('online-portal'),
                         ),
                         ActionChip(
-                          label: const Text('Craft District'),
+                          label: Text(strings.get('creatorDistrict')),
                           onPressed: () => onLandmark('craft-district'),
                         ),
                       ],
@@ -161,12 +165,12 @@ class WorldJournal extends StatelessWidget {
                       onTap: () => onLocation(l),
                     ),
                   if (locations.isEmpty)
-                    const ListTile(title: Text('No places here yet.')),
+                    ListTile(title: Text(strings.get('noPlaces'))),
                   if (query.isEmpty && !favoritesOnly) ...[
                     const Divider(),
-                    const ListTile(
-                      title: Text('Around the square'),
-                      subtitle: Text('App activity, not physical presence'),
+                    ListTile(
+                      title: Text(strings.get('aroundSquare')),
+                      subtitle: Text(strings.get('presenceNotice')),
                     ),
                     for (final p
                         in (WorldRuntimeData.maybeOf(context)?.policy ??
@@ -188,7 +192,7 @@ class WorldJournal extends StatelessWidget {
                       ListTile(
                         leading: const Icon(Icons.person_outline),
                         title: Text(p.name),
-                        subtitle: Text(p.status.label),
+                        subtitle: Text(strings.status(p.status)),
                         onTap: () => onPerson(p),
                       ),
                   ],

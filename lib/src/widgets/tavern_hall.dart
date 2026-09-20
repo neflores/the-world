@@ -9,6 +9,7 @@ import '../runtime/world_render_policy.dart';
 import '../renderer/atlas_assets.dart';
 import '../renderer/npc_layer.dart';
 import '../model/world_presence.dart';
+import '../localization/world_strings.dart';
 
 class TavernHall extends StatelessWidget {
   const TavernHall({
@@ -28,6 +29,7 @@ class TavernHall extends StatelessWidget {
   final ValueChanged<OpenWorldDestination> onAction;
   @override
   Widget build(BuildContext context) {
+    final strings = WorldLocalization.of(context);
     final runtime = WorldRuntimeData.maybeOf(context);
     final visitors = (runtime?.policy ?? const WorldRenderPolicy()).sample(
       snapshot.people.where((p) => p.contextId == location.id),
@@ -91,10 +93,10 @@ class TavernHall extends StatelessWidget {
                         child: Semantics(
                           button: onPerson != null,
                           label:
-                              '${visitors[i].name}, ${visitors[i].status.label}',
+                              '${visitors[i].name}, ${strings.status(visitors[i].status)}',
                           child: Tooltip(
                             message:
-                                '${visitors[i].name} · ${visitors[i].status.label}',
+                                '${visitors[i].name} · ${strings.status(visitors[i].status)}',
                             child: GestureDetector(
                               onTap: onPerson == null
                                   ? null
