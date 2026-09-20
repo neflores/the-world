@@ -11,6 +11,7 @@ class WorldToolbar extends StatelessWidget {
     required this.listOnly,
     required this.onListOnly,
     this.onAdd,
+    this.onAvatar,
     super.key,
   });
   final bool simulation, quiet, listOnly;
@@ -18,6 +19,7 @@ class WorldToolbar extends StatelessWidget {
   final ValueChanged<SocialStatus>? onStatus;
   final VoidCallback onQuiet, onListOnly;
   final VoidCallback? onAdd;
+  final VoidCallback? onAvatar;
   @override
   Widget build(BuildContext context) => Wrap(
     spacing: 12,
@@ -75,6 +77,13 @@ class WorldToolbar extends StatelessWidget {
           onPressed: onAdd,
           icon: const Icon(Icons.add),
           label: const Text('Add club'),
+        ),
+      if (onAvatar != null)
+        IconButton.filledTonal(
+          key: const ValueKey('edit-avatar'),
+          tooltip: 'Customize your avatar',
+          onPressed: onAvatar,
+          icon: const Icon(Icons.face_retouching_natural),
         ),
     ],
   );

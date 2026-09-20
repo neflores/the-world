@@ -30,3 +30,9 @@ clock changes, including open World dialogs. `WorldRenderPolicy` defines the
 avatar budget and motion policy. Sampling is stable across payload order, keeps
 the viewer first, and strips hidden/expired users. Hidden users must still be
 omitted by the backend; the snapshot's filtering is only defense in depth.
+
+`WorldViewer` is private viewer state and remains separate from public
+`WorldPresence`. `SetWorldContext` moves only the viewer's public projection
+between region, City and location contexts. Coordinates and autonomous avatar
+behavior remain renderer-owned. `ApplyWorldAvatar` carries cosmetic choices;
+the host owns identity, entitlement and durable production storage.

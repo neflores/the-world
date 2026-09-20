@@ -5,6 +5,10 @@ import '../model/world_snapshot.dart';
 import 'recruitment_table.dart';
 import '../runtime/world_clock.dart';
 import '../runtime/world_runtime.dart';
+import '../runtime/world_render_policy.dart';
+import '../renderer/atlas_assets.dart';
+import '../renderer/npc_layer.dart';
+import '../model/world_presence.dart';
 
 class TavernHall extends StatelessWidget {
   const TavernHall({
@@ -12,14 +16,24 @@ class TavernHall extends StatelessWidget {
     required this.snapshot,
     required this.onAction,
     this.clock = const SystemWorldClock(),
+    this.assets,
+    this.onPerson,
     super.key,
   });
   final WorldLocation location;
   final WorldSnapshot snapshot;
   final WorldClock clock;
+  final AtlasAssets? assets;
+  final ValueChanged<WorldPresence>? onPerson;
   final ValueChanged<OpenWorldDestination> onAction;
   @override
   Widget build(BuildContext context) {
+    final runtime = WorldRuntimeData.maybeOf(context);
+    final visitors = (runtime?.policy ?? const WorldRenderPolicy()).sample(
+      snapshot.people.where((p) => p.contextId == location.id),
+      runtime?.now ?? clock.now(),
+      viewerId: runtime?.viewerId,
+    );
     final tables =
         snapshot.recruitment
             .where(
@@ -67,6 +81,38 @@ class TavernHall extends StatelessWidget {
                           const ColoredBox(color: Color(0xFF433D2C)),
                     ),
                   ),
+                  if (assets != null)
+                    for (var i = 0; i < visitors.take(6).length; i++)
+                      Positioned(
+                        left: 105.0 + (i % 3) * 270,
+                        top: 240.0 + (i ~/ 3) * 125,
+                        width: 50,
+                        height: 75,
+                        child: Semantics(
+                          button: onPerson != null,
+                          label:
+                              '${visitors[i].name}, ${visitors[i].status.label}',
+                          child: Tooltip(
+                            message:
+                                '${visitors[i].name} · ${visitors[i].status.label}',
+                            child: GestureDetector(
+                              onTap: onPerson == null
+                                  ? null
+                                  : () => onPerson!(visitors[i]),
+                              child: CustomPaint(
+                                painter: AvatarPainter(
+                                  assets!,
+                                  i % 2,
+                                  0,
+                                  i.isOdd,
+                                  visitors[i].status,
+                                  visitors[i].avatar,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   Positioned.fill(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.all(16),
@@ -100,6 +146,7 @@ class TavernHall extends StatelessWidget {
                               for (final game in tables.take(9))
                                 RecruitmentTable(
                                   game: game,
+                                  people: snapshot.people,
                                   onTap: () => onAction(
                                     OpenWorldDestination(
                                       WorldDestination.game,

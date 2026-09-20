@@ -1,3 +1,5 @@
+import 'world_avatar.dart';
+
 enum SocialStatus {
   lookingForGame('Looking for a game'),
   openToMeet('Open to meeting people'),
@@ -22,11 +24,35 @@ class WorldPresence {
     this.leftAt,
     this.canMessage = false,
     this.canInvite = false,
+    this.avatar = const WorldAvatar(),
+    this.publicHeadline = '',
+    this.isFollowed = false,
   });
   final String id, name, contextId;
   final SocialStatus status;
   final DateTime? leftAt;
   final bool canMessage, canInvite;
+  final WorldAvatar avatar;
+  final String publicHeadline;
+  final bool isFollowed;
+  WorldPresence copyWith({
+    String? contextId,
+    SocialStatus? status,
+    WorldAvatar? avatar,
+    DateTime? leftAt,
+    bool? isFollowed,
+  }) => WorldPresence(
+    id: id,
+    name: name,
+    contextId: contextId ?? this.contextId,
+    status: status ?? this.status,
+    avatar: avatar ?? this.avatar,
+    leftAt: leftAt ?? this.leftAt,
+    publicHeadline: publicHeadline,
+    isFollowed: isFollowed ?? this.isFollowed,
+    canMessage: canMessage,
+    canInvite: canInvite,
+  );
   double opacityAt(DateTime now) {
     if (status == SocialStatus.hidden) return 0;
     if (leftAt == null) return 1;

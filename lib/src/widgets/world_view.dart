@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/world_data_source.dart';
 import '../interaction/world_intent.dart';
@@ -24,6 +25,7 @@ import 'world_journal.dart';
 import 'world_map_pane.dart';
 import 'world_toolbar.dart';
 import 'world_dialog.dart';
+import 'world_avatar_editor.dart';
 
 /// Embeddable World tab. The host provides data, permissions and action handling.
 class WorldView extends StatefulWidget {
@@ -105,13 +107,19 @@ class _WorldViewState extends State<WorldView> {
     super.dispose();
   }
 
-  void _selectCity(WorldCity? city) => setState(() {
-    _cityId = city?.id;
-    _selected = null;
-    _search = '';
-    _favoritesOnly = false;
-    _neighborhood = 0;
-  });
+  void _selectCity(WorldCity? city) {
+    setState(() {
+      _cityId = city?.id;
+      _selected = null;
+      _search = '';
+      _favoritesOnly = false;
+      _neighborhood = 0;
+    });
+    if (widget.capabilities.canUsePresence) {
+      unawaited(_dispatch(SetWorldContext(city?.id ?? 'region')));
+    }
+  }
+
   Future<void> _dispatch(WorldIntent intent) async {
     try {
       await widget.onIntent(intent);
@@ -210,20 +218,43 @@ class _WorldViewState extends State<WorldView> {
     );
   }
 
-  void _hall(WorldLocation location) => showWorldDialog<void>(
-    context: context,
-    builder: (dialogContext) => ListenableBuilder(
-      listenable: _controller,
-      builder: (_, _) => TavernHall(
-        location: location,
-        snapshot: _controller.snapshot!,
-        onAction: (intent) {
-          Navigator.pop(dialogContext);
-          _dispatch(intent);
-        },
+  Future<void> _hall(WorldLocation location) async {
+    if (widget.capabilities.canUsePresence) {
+      await _dispatch(SetWorldContext(location.id));
+    }
+    if (!mounted) return;
+    await showWorldDialog<void>(
+      context: context,
+      builder: (dialogContext) => ListenableBuilder(
+        listenable: _controller,
+        builder: (_, _) => TavernHall(
+          location: location,
+          snapshot: _controller.snapshot!,
+          assets: _assets,
+          onPerson: _person,
+          onAction: (intent) {
+            Navigator.pop(dialogContext);
+            _dispatch(intent);
+          },
+        ),
       ),
-    ),
-  );
+    );
+    if (mounted && widget.capabilities.canUsePresence) {
+      await _dispatch(SetWorldContext(_cityId ?? 'region'));
+    }
+  }
+
+  Future<void> _editAvatar(WorldSnapshot snapshot) async {
+    final viewer = snapshot.viewer;
+    if (viewer == null) return;
+    await showWorldDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          WorldAvatarEditor(initial: viewer.avatar, onIntent: _intent),
+    );
+  }
+
   void _landmark(String id) {
     switch (id) {
       case 'favorites-square':
@@ -340,6 +371,11 @@ class _WorldViewState extends State<WorldView> {
                           onAdd:
                               widget.canCreateClub && snapshot.cities.isNotEmpty
                               ? _addClub
+                              : null,
+                          onAvatar:
+                              widget.capabilities.canUsePresence &&
+                                  snapshot.viewer != null
+                              ? () => _editAvatar(snapshot)
                               : null,
                         ),
                         if (_controller.error != null)

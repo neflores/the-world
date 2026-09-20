@@ -2,6 +2,7 @@ import 'world_city.dart';
 import 'world_location.dart';
 import 'world_presence.dart';
 import 'world_recruitment.dart';
+import 'world_viewer.dart';
 
 class WorldSnapshot {
   WorldSnapshot({
@@ -13,6 +14,7 @@ class WorldSnapshot {
     this.isSimulation = false,
     this.schemaVersion = 1,
     this.revision = 0,
+    this.viewer,
   }) : cities = List.unmodifiable(cities),
        locations = List.unmodifiable(locations),
        people = List.unmodifiable(
@@ -54,6 +56,7 @@ class WorldSnapshot {
   final SocialStatus status;
   final bool isSimulation;
   final int schemaVersion, revision;
+  final WorldViewer? viewer;
   List<WorldLocation> inCity(String id) =>
       locations.where((l) => l.cityId == id).toList();
   WorldSnapshot copyWith({
@@ -63,6 +66,7 @@ class WorldSnapshot {
     SocialStatus? status,
     List<WorldCity>? cities,
     int? revision,
+    WorldViewer? viewer,
   }) => WorldSnapshot(
     cities: cities ?? this.cities,
     locations: locations ?? this.locations,
@@ -72,5 +76,6 @@ class WorldSnapshot {
     isSimulation: isSimulation,
     schemaVersion: schemaVersion,
     revision: revision ?? this.revision + 1,
+    viewer: viewer ?? this.viewer,
   );
 }

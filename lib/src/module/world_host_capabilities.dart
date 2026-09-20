@@ -49,6 +49,7 @@ class WorldHostCapabilities {
       ApplyWorldAppearance() => canEditAppearance,
       RequestWorldAppearanceUnlock() => canEditAppearance,
       SetWorldStatus() => canUsePresence,
+      SetWorldContext() || ApplyWorldAvatar() => canUsePresence,
       SetWorldFavorite() => true,
       OpenWorldDestination(:final destination) =>
         canNavigate &&

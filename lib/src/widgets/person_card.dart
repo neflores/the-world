@@ -21,6 +21,10 @@ class PersonCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(person.status.label),
+        if (person.publicHeadline.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(person.publicHeadline),
+        ],
         const SizedBox(height: 12),
         Text(
           person.leftAt == null

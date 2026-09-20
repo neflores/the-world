@@ -3,6 +3,8 @@ import '../model/world_appearance.dart';
 import '../model/world_city.dart';
 import '../model/city_glory.dart';
 import '../model/world_decoration_slots.dart';
+import '../model/world_avatar.dart';
+import '../model/world_viewer.dart';
 import '../runtime/world_clock.dart';
 import '../model/world_location.dart';
 import '../model/world_presence.dart';
@@ -151,6 +153,7 @@ WorldSnapshot createDemoSnapshot({DateTime? now}) {
     ],
     locations: locations,
     isSimulation: true,
+    viewer: const WorldViewer(id: 'local-player', name: 'You'),
     people: [
       for (final city in demoCities)
         for (var i = 0; i < 8; i++)
@@ -167,6 +170,13 @@ WorldSnapshot createDemoSnapshot({DateTime? now}) {
               'Eli',
             ][i],
             contextId: city.id,
+            avatar: WorldAvatar(
+              hairstyle: WorldHairstyle.values[i % 2],
+              clothingColor: [0xFF537EA1, 0xFF8B535D, 0xFF63836B][i % 3],
+            ),
+            publicHeadline: i.isEven
+                ? 'D&D · English · Welcomes beginners'
+                : 'Pathfinder · English, Hebrew',
             status: SocialStatus.values[i % 7],
             canMessage: true,
             leftAt: i == 7 ? time.subtract(const Duration(minutes: 5)) : null,
@@ -192,6 +202,9 @@ WorldSnapshot createDemoSnapshot({DateTime? now}) {
               'demo-person-${city.id}-2',
             ],
             phrase: 'Curious explorers welcome. Let’s tell a story.',
+            requirements: i == 1
+                ? const ['18+', 'Character ready']
+                : const ['Beginners welcome'],
             isOnline: i == 2,
           ),
     ],

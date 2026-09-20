@@ -1,6 +1,9 @@
 import '../model/club_draft.dart';
 import '../model/world_appearance.dart';
 import '../model/world_presence.dart';
+import '../model/world_avatar.dart';
+
+part 'presence_intent.dart';
 
 sealed class WorldIntent {
   const WorldIntent();

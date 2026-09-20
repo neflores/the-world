@@ -13,7 +13,9 @@ class WorldRecruitment {
     this.phrase = '',
     this.isOnline = false,
     this.closed = false,
-  }) : participantIds = List.unmodifiable(participantIds);
+    List<String> requirements = const [],
+  }) : participantIds = List.unmodifiable(participantIds),
+       requirements = List.unmodifiable(requirements);
   final String id,
       locationId,
       title,
@@ -27,6 +29,7 @@ class WorldRecruitment {
 
   /// Seat projections are independent of wandering presence.
   final List<String> participantIds;
+  final List<String> requirements;
   final bool isOnline, closed;
   int get openSeats => (capacity - participantIds.length).clamp(0, capacity);
   bool isPublicAt(DateTime now) =>

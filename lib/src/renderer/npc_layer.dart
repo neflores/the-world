@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../model/world_avatar.dart';
 import '../model/world_presence.dart';
 import 'atlas_assets.dart';
 import 'atlas_scene.dart';
@@ -99,7 +100,12 @@ class _NpcLayerState extends State<NpcLayer>
 
   Widget _person(WorldPresence person, int i, double seconds) {
     final route = widget.scene.routes[i % widget.scene.routes.length];
-    final phase = (seconds * 12 / math.max(route.length, 1) + i * .21) % 2;
+    // Presentation behavior is deterministic and remains client-side.
+    final behaviorTime = (seconds + i % 17) % 22;
+    final idle = behaviorTime >= 15;
+    final travelSeconds = seconds - math.max(0, behaviorTime - 15);
+    final phase =
+        (travelSeconds * 12 / math.max(route.length, 1) + i * .21) % 2;
     final t = phase <= 1 ? phase : 2 - phase;
     final p = route.at(t);
     final next = route.at((t + (phase <= 1 ? .01 : -.01)).clamp(0, 1));
@@ -121,9 +127,12 @@ class _NpcLayerState extends State<NpcLayer>
                 painter: AvatarPainter(
                   widget.scene.assets,
                   i % 2,
-                  _still ? 0 : (seconds * 6).floor() % 4,
+                  _still || idle
+                      ? ((i ~/ 7) % 2) * 3
+                      : (seconds * 6).floor() % 4,
                   next.dx < p.dx,
                   person.status,
+                  person.avatar,
                 ),
               ),
             ),
@@ -141,11 +150,13 @@ class AvatarPainter extends CustomPainter {
     this.frame,
     this.mirrored,
     this.status,
+    this.avatar,
   );
   final AtlasAssets assets;
   final int character, frame;
   final bool mirrored;
   final SocialStatus status;
+  final WorldAvatar avatar;
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawOval(
@@ -163,15 +174,85 @@ class AvatarPainter extends CustomPainter {
       const Rect.fromLTWH(0, 0, 50, 67),
       Paint()..filterQuality = FilterQuality.low,
     );
-    canvas.restore();
-    canvas.drawCircle(
-      const Offset(40, 10),
-      5,
-      Paint()
-        ..color = status == SocialStatus.doNotDisturb
-            ? const Color(0xFFCE8861)
-            : const Color(0xFF9CD2A1),
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(14, 35, 22, 25),
+        const Radius.circular(6),
+      ),
+      Paint()..color = Color(avatar.clothingColor).withValues(alpha: .5),
     );
+    canvas.drawArc(
+      Rect.fromLTWH(
+        15,
+        avatar.hairstyle == WorldHairstyle.long ? 5 : 8,
+        20,
+        avatar.hairstyle == WorldHairstyle.long ? 25 : 16,
+      ),
+      math.pi,
+      math.pi,
+      true,
+      Paint()..color = Color(avatar.hairColor).withValues(alpha: .7),
+    );
+    canvas.restore();
+    _drawStatus(canvas, const Offset(40, 10));
+  }
+
+  void _drawStatus(Canvas canvas, Offset center) {
+    final color = status == SocialStatus.doNotDisturb
+        ? const Color(0xFFCE8861)
+        : const Color(0xFF457B65);
+    canvas.drawCircle(center, 7, Paint()..color = const Color(0xFFE9D6AC));
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+    switch (status) {
+      case SocialStatus.lookingForGame:
+        canvas.drawRect(
+          Rect.fromCenter(center: center, width: 7, height: 7),
+          paint,
+        );
+        break;
+      case SocialStatus.openToMeet:
+        canvas.drawCircle(center.translate(-2, 0), 3, paint);
+        canvas.drawCircle(center.translate(2, 0), 3, paint);
+        break;
+      case SocialStatus.waitingForParty:
+        canvas.drawLine(
+          center.translate(-4, 3),
+          center.translate(0, -4),
+          paint,
+        );
+        canvas.drawLine(center.translate(0, -4), center.translate(4, 3), paint);
+        break;
+      case SocialStatus.browsing:
+        canvas.drawCircle(center, 3.5, paint);
+        canvas.drawLine(center.translate(3, 3), center.translate(6, 6), paint);
+        break;
+      case SocialStatus.newSystem:
+        canvas.drawLine(center.translate(-4, 0), center.translate(4, 0), paint);
+        canvas.drawLine(center.translate(0, -4), center.translate(0, 4), paint);
+        break;
+      case SocialStatus.online:
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: 4),
+          math.pi * 1.15,
+          math.pi * .7,
+          false,
+          paint,
+        );
+        break;
+      case SocialStatus.doNotDisturb:
+        canvas.drawLine(
+          center.translate(-4, 4),
+          center.translate(4, -4),
+          paint,
+        );
+        break;
+      case SocialStatus.hidden:
+        canvas.drawLine(center.translate(-4, 0), center.translate(4, 0), paint);
+        break;
+    }
   }
 
   @override
@@ -180,5 +261,6 @@ class AvatarPainter extends CustomPainter {
       old.character != character ||
       old.mirrored != mirrored ||
       old.status != status ||
+      old.avatar != avatar ||
       old.assets != assets;
 }

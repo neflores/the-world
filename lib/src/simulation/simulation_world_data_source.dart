@@ -8,6 +8,7 @@ import '../model/world_presence.dart';
 import '../model/world_snapshot.dart';
 import 'demo_catalog.dart';
 import '../runtime/world_clock.dart';
+import '../model/world_avatar.dart';
 
 /// Fixture provider. Production never falls back to this source implicitly.
 class SimulationWorldDataSource implements WorldDataSource {
@@ -27,6 +28,13 @@ class SimulationWorldDataSource implements WorldDataSource {
             .map((v) => WorldLocation.fromJson(v as Map<String, dynamic>))
             .toList(),
         status: SocialStatus.values.byName(json['status'] as String),
+        viewer: json['avatar'] == null
+            ? _snapshot.viewer
+            : _snapshot.viewer!.copyWith(
+                avatar: WorldAvatar.fromJson(
+                  json['avatar'] as Map<String, dynamic>,
+                ),
+              ),
       );
     }
   }
@@ -49,6 +57,7 @@ class SimulationWorldDataSource implements WorldDataSource {
     'version': 1,
     'locations': value.locations.map((l) => l.toJson()).toList(),
     'status': value.status.name,
+    'avatar': value.viewer?.avatar.toJson(),
   });
 
   @override
@@ -107,6 +116,21 @@ class SimulationWorldDataSource implements WorldDataSource {
           );
         case SetWorldStatus(:final status):
           next = next.copyWith(status: status);
+          next = _projectViewer(next);
+        case SetWorldContext(:final contextId):
+          if (contextId != 'region' &&
+              contextId != 'online' &&
+              !next.cities.any((c) => c.id == contextId) &&
+              !next.locations.any((l) => l.id == contextId)) {
+            throw ArgumentError('Unknown World context');
+          }
+          next = _projectViewer(
+            next.copyWith(viewer: next.viewer!.copyWith(contextId: contextId)),
+          );
+        case ApplyWorldAvatar(:final avatar):
+          next = _projectViewer(
+            next.copyWith(viewer: next.viewer!.copyWith(avatar: avatar)),
+          );
         case OpenWorldDestination():
           return;
         case RequestWorldAppearanceUnlock():
@@ -125,6 +149,26 @@ class SimulationWorldDataSource implements WorldDataSource {
     if (!_snapshot.locations.any((l) => l.id == id)) {
       throw ArgumentError('Unknown location');
     }
+  }
+
+  WorldSnapshot _projectViewer(WorldSnapshot value) {
+    final viewer = value.viewer;
+    if (viewer == null) return value;
+    return value.copyWith(
+      people: [
+        for (final p in value.people)
+          if (p.id != viewer.id) p,
+        if (value.status != SocialStatus.hidden && viewer.contextId != 'region')
+          WorldPresence(
+            id: viewer.id,
+            name: viewer.name,
+            contextId: viewer.contextId,
+            avatar: viewer.avatar,
+            status: value.status,
+            publicHeadline: 'Your World avatar',
+          ),
+      ],
+    );
   }
 
   Future<void> dispose() async {
